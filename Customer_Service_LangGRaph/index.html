@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Customer Support Assistant</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="chat-container">
+    <header class="chat-header">
+      <h2>💬 Customer Support</h2>
+      <p>We’re here to help</p>
+    </header>
+
+    <div id="chat-window" class="chat-window">
+      <div class="message agent">
+        Hi 👋 I’m your support assistant. How can I help you today?
+      </div>
+    </div>
+
+    <form id="chat-form" class="chat-input">
+      <input
+        type="text"
+        id="user-input"
+        placeholder="Type your message..."
+        autocomplete="off"
+        required
+      />
+      <button type="submit">Send</button>
+    </form>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script type="module" src="script.js"></script>
+</body>
+</html>
