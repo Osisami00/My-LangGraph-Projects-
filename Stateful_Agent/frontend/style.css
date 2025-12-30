@@ -1,0 +1,45 @@
+body {
+  background: #0f172a;
+  font-family: Arial;
+  color: white;
+}
+
+.chat-container {
+  width: 400px;
+  margin: 60px auto;
+  background: #020617;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+#chat-box {
+  height: 300px;
+  overflow-y: auto;
+  margin-bottom: 10px;
+}
+
+.message {
+  margin: 8px 0;
+}
+
+.user { color: #38bdf8; }
+.bot { color: #a7f3d0; }
+
+/* NEW: Loading style for AI typing */
+.message.loading {
+  font-style: italic;
+  color: #facc15; /* bright yellow to indicate typing */
+}
+
+input {
+  width: 75%;
+  padding: 8px;
+}
+
+button {
+  width: 20%;
+  padding: 8px;
+  background: #38bdf8;
+  border: none;
+  cursor: pointer;
+}
