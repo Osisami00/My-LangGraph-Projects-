@@ -8,18 +8,18 @@ from langgraph.checkpoint.memory import MemorySaver
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain_core.messages import SystemMessage, HumanMessage
 
-# -----------------------------
+
 # Load environment variables
-# -----------------------------
+
 load_dotenv()
 
 api_key = os.getenv("GOOGLE_API_KEY")
 if not api_key:
     raise ValueError("GOOGLE_API_KEY not set in environment!")
 
-# -----------------------------
+
 # Initialize FastAPI
-# -----------------------------
+
 app = FastAPI(title="Customer Support Chatbot API")
 
 # Enable CORS for frontend access
@@ -31,18 +31,18 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# -----------------------------
+
 # Initialize Gemini LLM
-# -----------------------------
+
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.5-flash",  # make sure this model exists
     api_key=api_key,
     temperature=0.3,
 )
 
-# -----------------------------
+
 # System Prompt
-# -----------------------------
+
 SYSTEM_PROMPT = SystemMessage(
     content=(
         "You are a helpful and polite customer support representative. "
@@ -50,9 +50,9 @@ SYSTEM_PROMPT = SystemMessage(
     )
 )
 
-# -----------------------------
+
 # Chatbot Node
-# -----------------------------
+
 def support_agent(state: MessagesState):
     messages = state.get("messages", [])
     if not messages or messages[0].type != "system":
@@ -65,9 +65,9 @@ def support_agent(state: MessagesState):
 
     return {"messages": messages + [response]}
 
-# -----------------------------
+
 # Build LangGraph with Memory
-# -----------------------------
+
 graph = StateGraph(MessagesState)
 graph.add_node("support", support_agent)
 graph.set_entry_point("support")
@@ -76,9 +76,9 @@ graph.set_finish_point("support")
 memory = MemorySaver()
 chat_app = graph.compile(checkpointer=memory)
 
-# -----------------------------
+
 # Request / Response Models
-# -----------------------------
+
 class ChatRequest(BaseModel):
     message: str
     thread_id: str
@@ -86,9 +86,9 @@ class ChatRequest(BaseModel):
 class ChatResponse(BaseModel):
     reply: str
 
-# -----------------------------
+
 # API Endpoints
-# -----------------------------
+
 @app.get("/ping")
 def ping():
     """Simple health check"""
