@@ -2,14 +2,16 @@ const chatBox = document.getElementById("chat-box");
 const input = document.getElementById("user-input");
 
 async function sendMessage() {
+  console.log("📨 Sending message to backend...");
+
   const userMessage = input.value.trim();
   if (!userMessage) return;
 
-  // Display user message
+  // Show user message
   appendMessage("You", userMessage, "user");
   input.value = "";
 
-  // Display loading state
+  // Show loading
   const loadingId = appendMessage("AI", "Typing...", "bot loading");
 
   try {
@@ -19,43 +21,57 @@ async function sendMessage() {
       body: JSON.stringify({ message: userMessage })
     });
 
+    if (!res.ok) {
+      throw new Error(`HTTP error ${res.status}`);
+    }
+
     const data = await res.json();
-    // Remove loading text
+    console.log("Backend response:", data);
+
+    // Remove loading
     removeMessage(loadingId);
 
-    // Extract reply
-    const replyText = data.reply;
+    const replyText = data.reply || "(No response from backend)";
 
-    // Detect tool usage (basic simulation)
+    // Basic tool detection (UI-only hint)
     let toolUsed = "";
-    if (/Weather|temperature|Sunny|Cloudy|Rainy/i.test(replyText)) toolUsed = "Weather Tool";
-    else if (/Definition|lasting|ephemeral|agent/i.test(replyText)) toolUsed = "Dictionary Tool";
-    else if (/search|https?:\/\/|No results/i.test(replyText)) toolUsed = "Web Search Tool";
+    if (/sunny|cloudy|rainy|weather|temperature/i.test(replyText)) {
+      toolUsed = "Weather Tool";
+    } else if (/definition|means|refers to|lasting/i.test(replyText)) {
+      toolUsed = "Dictionary Tool";
+    } else if (/search|result|found|according to/i.test(replyText)) {
+      toolUsed = "Web Search Tool";
+    }
 
-    appendMessage("AI", replyText + (toolUsed ? `\n🛠 Used: ${toolUsed}` : ""), "bot");
+    const finalText = toolUsed
+      ? `${replyText}\n🛠 Tool used: ${toolUsed}`
+      : replyText;
+
+    appendMessage("AI", finalText, "bot");
 
   } catch (err) {
+    console.error("Frontend error:", err);
     removeMessage(loadingId);
-    appendMessage("AI", "⚠️ Error: Could not get response.", "bot");
-    console.error(err);
+    appendMessage("AI", "Error connecting to backend.", "bot");
   }
 }
 
-// Helper to append messages
+// Append message safely
 function appendMessage(sender, text, cls) {
   const msg = document.createElement("div");
-  msg.classList.add("message", cls);
+  msg.className = `message ${cls}`;
   msg.innerText = `${sender}: ${text}`;
+
+  const id = "msg-" + Math.random().toString(36).slice(2);
+  msg.id = id;
+
   chatBox.appendChild(msg);
   chatBox.scrollTop = chatBox.scrollHeight;
 
-  // Return element ID for removal
-  const id = Date.now();
-  msg.id = id;
   return id;
 }
 
-// Remove a message (used for loading)
+// Remove message by ID
 function removeMessage(id) {
   const msg = document.getElementById(id);
   if (msg) msg.remove();

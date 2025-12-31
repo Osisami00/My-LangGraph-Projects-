@@ -18,19 +18,35 @@ app.add_middleware(
 class ChatRequest(BaseModel):
     message: str
 
+
 @app.post("/chat")
 async def chat(req: ChatRequest):
     try:
-        result = langgraph_app.invoke({"messages": [HumanMessage(content=req.message)]})
-        raw_reply = result["messages"][-1].content
+        result = langgraph_app.invoke(
+            {"messages": [HumanMessage(content=req.message)]}
+        )
 
-        # Remove Markdown **bold**
-        cleaned = re.sub(r"\*\*(.*?)\*\*", r"\1", raw_reply)
+        last_msg = result["messages"][-1]
+        content = last_msg.content
 
-        # Replace newlines and bullet points with full stops
-        cleaned = re.sub(r"[\n\*]+", ". ", cleaned)
+        
+        # FIX: Normalize content to string
+        
+        if isinstance(content, list):
+            # Gemini sometimes returns structured content
+            content = " ".join(
+                part.get("text", "")
+                for part in content
+                if isinstance(part, dict)
+            )
 
-        # Remove extra spaces
+        if not isinstance(content, str):
+            content = str(content)
+
+        
+        # formatting output
+        cleaned = re.sub(r"\*\*(.*?)\*\*", r"\1", content)
+        cleaned = re.sub(r"[\n•*-]+", ". ", cleaned)
         cleaned = re.sub(r"\s{2,}", " ", cleaned).strip()
 
         return {"reply": cleaned}
@@ -38,4 +54,4 @@ async def chat(req: ChatRequest):
     except Exception as e:
         import traceback
         traceback.print_exc()
-        return {"reply": f"⚠️ Internal error: {str(e)}"}
+        return {"reply": f"Internal error: {str(e)}"}
